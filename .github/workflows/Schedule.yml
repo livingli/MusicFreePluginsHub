@@ -12,8 +12,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python environment
-        uses: ./.github/actions/setup-python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'  # Specify the Python version you need
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Cache uv cache and virtual environment
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: ${{ runner.os }}-uv-${{ hashFiles('**/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
 
       - name: Install prerequisites
         run: uv sync --all-extras --dev
